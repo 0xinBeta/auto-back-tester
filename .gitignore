@@ -1,0 +1,30 @@
+# Environment variables
+.env
+
+# Virtual Environment
+venv/
+env/
+trader/
+
+
+# Compiled Files
+__pycache__/
+*.py[cod]
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# IDE settings
+.vscode/
+
+# Logs and databases
+*.log
+*.sqlite
+
+# Build and distributions
+dist/
+build/
+
+# OS generated files
+.DS_Store
+Thumbs.db
