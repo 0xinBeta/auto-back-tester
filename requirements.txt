@@ -4,3 +4,4 @@ finta
 pandas
 ta
 numpy
+vectorbt
