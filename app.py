@@ -168,7 +168,6 @@ def run_backtests_sequentially():
                 result = backtest_strategy(strategy_params_combination)
                 # Save or print the results
                 insert_backtest_result(result)
-                print(result)
                 time.sleep(600)
 
 if __name__ == "__main__":

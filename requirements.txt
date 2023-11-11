@@ -3,6 +3,8 @@ python-dotenv
 finta
 pandas
 ta
+numba==0.56.4
 numpy
 vectorbt
 psycopg2-binary
+Backtesting
