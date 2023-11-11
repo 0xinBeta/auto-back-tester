@@ -5,8 +5,9 @@ from backtesting.lib import Strategy
 from finta import TA
 from ta.trend import adx
 import time
+import ccxt
+import sys
 
-# Constants for default parameters and configuration
 DEFAULT_CASH = 100_000
 DEFAULT_MARGIN = 0.008
 DEFAULT_SYMBOL_OPTIONS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SANDUSDT",
@@ -23,12 +24,10 @@ EMA_MID_LEN = 21
 EMA_LONG_LEN = 50
 ADX_INDEX = 20
 
-# QuantitativeModelStrategy and create_df functions should be defined here (not shown for brevity)
 def create_df(symbol: str, timeframe: str, start: str, end: str,
               ema_short_len: int, ema_mid_len: int, ema_long_len: int,
               adx_index: int):
     """Download and compute technical indicators for a given symbol and time frame."""
-    time.sleep(1)
     df = vbt.CCXTData.download(
         symbols=symbol,
         missing_index="drop",
@@ -118,9 +117,9 @@ class QuantitativeModelStrategy(Strategy):
                     self.sell(size=pos_size_short, sl=sl_short, tp=tp_short)
 
 def backtest_strategy(strategy_params):
-    # Unpack the parameters
+    
     symbol, timeframe, start = strategy_params
-    # Download and compute the data
+
     df = create_df(
         symbol=symbol,
         timeframe=timeframe,
@@ -137,10 +136,12 @@ def backtest_strategy(strategy_params):
                   cash=DEFAULT_CASH, margin=DEFAULT_MARGIN)
     stats = bt.optimize(
                 tp_m=range(5,11),
-                sl_m=range(1,6),
+                sl_m=range(1,5),
                 maximize='Win Rate [%]' and 'Return [%]' and 'Sharpe Ratio' and 'Sortino Ratio',
                 method='grid'
             )
+    tp_m_value = stats._strategy.tp_m
+    sl_m_value = stats._strategy.sl_m
 
     # Here you can customize the data that you want to collect from each backtest
     result = {
@@ -151,8 +152,8 @@ def backtest_strategy(strategy_params):
         'return': stats['Return [%]'],
         'winrate': stats['Win Rate [%]'],
         'max_drawdown': stats['Max. Drawdown [%]'],
-        'strategy': stats._strategy
-        # Include more metrics as needed
+        'tp_m': tp_m_value,
+        'sl_m': sl_m_value
     }
 
     return result
@@ -164,9 +165,33 @@ def run_backtests_sequentially():
             for start in DEFAULT_START_OPTIONS:
                 strategy_params_combination = (symbol, timeframe, start)
                 result = backtest_strategy(strategy_params_combination)
+                time.sleep(600)
                 # Save or print the results
                 print(result)
 
 if __name__ == "__main__":
     mp.set_start_method('fork', force=True)
-    run_backtests_sequentially()
+    while True:
+        try: 
+            run_backtests_sequentially()
+        except ccxt.RequestTimeout as e:
+            print(type(e).__name__, str(e))
+            time.sleep(60)
+        except ccxt.DDoSProtection as e:
+            # recoverable error, you might want to sleep a bit here and retry later
+            print(type(e).__name__, str(e))
+            time.sleep(60)
+        except ccxt.ExchangeNotAvailable as e:
+            # recoverable error, do nothing and retry later
+            print(type(e).__name__, str(e))
+            time.sleep(60)
+        except ccxt.NetworkError as e:
+            # do nothing and retry later...
+            print(type(e).__name__, str(e))
+            time.sleep(60)
+        except Exception as e:
+            # panic and halt the execution in case of any other error
+            print(type(e).__name__, str(e))
+            sys.exit()
+
+        
