@@ -7,6 +7,7 @@ from ta.trend import adx
 import time
 import ccxt
 import sys
+from db_handlers import insert_backtest_result
 
 DEFAULT_CASH = 100_000
 DEFAULT_MARGIN = 0.008
@@ -165,9 +166,10 @@ def run_backtests_sequentially():
             for start in DEFAULT_START_OPTIONS:
                 strategy_params_combination = (symbol, timeframe, start)
                 result = backtest_strategy(strategy_params_combination)
-                time.sleep(600)
                 # Save or print the results
+                insert_backtest_result(result)
                 print(result)
+                time.sleep(600)
 
 if __name__ == "__main__":
     mp.set_start_method('fork', force=True)

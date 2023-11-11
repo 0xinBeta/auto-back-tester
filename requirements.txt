@@ -5,3 +5,4 @@ pandas
 ta
 numpy
 vectorbt
+psycopg2-binary
