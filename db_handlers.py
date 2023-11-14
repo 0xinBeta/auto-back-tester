@@ -48,3 +48,23 @@ def insert_backtest_result(result):
     conn.commit()
     cur.close()
     conn.close()
+
+def get_filtered_backtest_results():
+    """Retrieve backtest results with max_drawdown below 10 and return_percentage above 20."""
+    conn = connect_to_db()
+    cur = conn.cursor()
+    
+    query = sql.SQL("""
+        SELECT * FROM backtest_results
+        WHERE max_drawdown > -10.0 AND return_percentage > 20.0
+            AND start_date = '30 day ago UTC'
+    """)
+    
+    cur.execute(query)
+    results = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+
+    return results
+
