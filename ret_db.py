@@ -5,7 +5,8 @@ import datetime
 import pandas as pd
 
 
-def main():
+def get_trade_parameters():
+    
     results = get_filtered_backtest_results()
     # Calculate the date 30 days ago
     thirty_days_ago = datetime.datetime.now() - datetime.timedelta(days=30)
@@ -33,7 +34,3 @@ def main():
     data_list = df[selected_columns].to_dict(orient='records')
 
     return data_list
-
-
-if __name__ == "__main__":
-    print(main())
