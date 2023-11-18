@@ -23,23 +23,12 @@ def main():
     for key, group in groupby(sorted_results, key=itemgetter(1, 2)):
         grouped_results.append(next(group))
 
-    # Output the filtered results
-    return grouped_results
-
-
-def create_dataframe(results):
-    # Define the column names
     columns = ['id', 'symbol', 'timeframe', 'start_date', 'num_trades',
                'return_percentage', 'winrate', 'max_drawdown', 'tp_m', 'sl_m', 'created_at']
 
     # Create a DataFrame from the results
-    df = pd.DataFrame(results, columns=columns)
+    df = pd.DataFrame(grouped_results, columns=columns)
 
-    return df
-
-
-def extract_data(df):
-    # Select the columns and convert each row to a dictionary
     selected_columns = ['symbol', 'timeframe', 'tp_m', 'sl_m']
     data_list = df[selected_columns].to_dict(orient='records')
 
@@ -47,5 +36,4 @@ def extract_data(df):
 
 
 if __name__ == "__main__":
-    print(extract_data(create_dataframe(main())))
-
+    print(main())
