@@ -15,7 +15,8 @@ API_KEY = os.getenv('API_KEY')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Constants
 LIMIT = 500
@@ -50,10 +51,13 @@ def get_rounding_values(symbol):
         "LINKUSDT": 2,
     }
 
-    round_decimal_price = round_decimal_price_map.get(symbol, 2)  # Default to 2 if symbol not found
-    round_decimal_pos = round_decimal_pos_map.get(symbol, 2)     # Default to 2 if symbol not found
+    round_decimal_price = round_decimal_price_map.get(
+        symbol, 2)  # Default to 2 if symbol not found
+    round_decimal_pos = round_decimal_pos_map.get(
+        symbol, 2)     # Default to 2 if symbol not found
 
     return round_decimal_price, round_decimal_pos
+
 
 async def set_max_leverage(exchange, symbol, coin):
     """
@@ -77,7 +81,8 @@ def calculate_order_details(entry_price, atr, symbol, balance, direction, tp_mul
     sl = entry_price - round((atr * sl_multiplier), round_decimal_price)
     tp = entry_price + round((atr * tp_multiplier), round_decimal_price)
     distance = abs(entry_price - sl)
-    position_size = round((balance * RISK_PERCENTAGE) / distance, round_decimal_pos)
+    position_size = round((balance * RISK_PERCENTAGE) /
+                          distance, round_decimal_pos)
 
     return position_size, sl, tp
 
@@ -96,9 +101,8 @@ async def place_orders(exchange, symbol, position_size, sl, tp, direction):
     await exchange.create_order(symbol=symbol, type="TRAILING_STOP_MARKET", side=opposite_side, amount=position_size,
                                 price=tp, params={"reduceOnly": True, "activationPrice": tp, "callbackRate": CALLBACK_RATE})
 
-    
     await getattr(exchange, f'create_limit_{opposite_side}_order')(symbol=symbol, amount=position_size, price=sl,
-                                                          params={"stopPrice": sl, "reduceOnly": True})
+                                                                   params={"stopPrice": sl, "reduceOnly": True})
 
 
 async def trade_logic(exchange, symbol, timeframe, tp_m, sl_m):
@@ -125,11 +129,13 @@ async def trade_logic(exchange, symbol, timeframe, tp_m, sl_m):
                     balance = await exchange.fetch_balance()['USDT']['free']
                     direction = 'long' if long_signal else 'short'
 
-                    position_size, sl, tp = calculate_order_details(entry_price, atr, symbol, balance, direction, tp_m, sl_m)
+                    position_size, sl, tp = calculate_order_details(
+                        entry_price, atr, symbol, balance, direction, tp_m, sl_m)
 
                     _, round_decimal_pos = get_rounding_values(symbol)
 
-                    position_size = round((position_size * entry_price) / max_lev / balance, round_decimal_pos)
+                    position_size = round(
+                        (position_size * entry_price) / max_lev / balance, round_decimal_pos)
 
                     await place_orders(exchange, symbol, position_size, sl, tp, direction)
 
@@ -151,8 +157,6 @@ async def main():
         "secret": SECRET_KEY,
     })
 
-    
-
     # Initialize last update check
     last_update = datetime.min
 
@@ -167,7 +171,8 @@ async def main():
             last_update = current_time
 
         # Update your trading logic with trade_params
-        tasks = [trade_logic(exchange, param['symbol'], param['timeframe'], param['tp_m'], param['sl_m']) for param in trade_params]
+        tasks = [trade_logic(exchange, param['symbol'], param['timeframe'],
+                             param['tp_m'], param['sl_m']) for param in trade_params]
         await asyncio.gather(*tasks)
 
         # Add a sleep here to prevent continuous loop without delay
@@ -177,6 +182,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
