@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO,
 
 # Constants
 LIMIT = 500
-RISK_PERCENTAGE = 0.01
+RISK_PERCENTAGE = 0.005
 CALLBACK_RATE = 0.1
 
 
@@ -114,6 +114,7 @@ async def trade_logic(exchange, symbol, timeframe, tp_m, sl_m):
     while True:
         try:
             df = await create_df_async(exchange=exchange, symbol=symbol, time_frame=timeframe, limit=LIMIT)
+            # print(df.tail(1))
 
             long_signal = df['long'].iloc[-2]
             short_signal = df['short'].iloc[-2]
@@ -176,9 +177,10 @@ async def main():
         await asyncio.gather(*tasks)
 
         # Add a sleep here to prevent continuous loop without delay
+        
         await asyncio.sleep(1)
 
-    await exchange.close()
+        await exchange.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
